@@ -1,5 +1,5 @@
 <?php
-require('./Exceptions/OaiException.php');
+require_once('./Exceptions/OaiException.php');
 
 class OaiClient
 {
@@ -29,7 +29,6 @@ class OaiClient
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         var_dump($url);
         $xml = curl_exec($curl);
-        curl_close($curl);
 
         if (curl_error($curl) || $xml === '') {
             throw new OaiException(

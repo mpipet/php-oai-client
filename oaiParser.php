@@ -1,30 +1,21 @@
 <?php
-require('./Exceptions/ParseException.php');
+require_once('./Exceptions/ParseException.php');
 
 class OaiParser
 {
 
     protected $simpleXMLObject = null;
 
+    /**
+     * @param $xml
+     * @throws ParseException
+     */
     public function __construct($xml)
     {
         \libxml_use_internal_errors(true);
         $this->simpleXMLObject = new SimpleXMLElement($xml);
-        $this->simpleXMLObject = $this->registerOaiNameSpaces($this->simpleXMLObject);
         $this->hasXmlErrorOccured();
 
-    }
-
-    /**
-     * @param SimpleXMLElement $simpleXml
-     * @return SimpleXMLElement
-     */
-    public function registerOaiNameSpaces(SimpleXMLElement $simpleXml)
-    {
-        $simpleXml->registerXPathNamespace('oai_dc', 'http://www.openarchives.org/OAI/2.0/oai_dc/');
-        $simpleXml->registerXPathNamespace('dc', 'http://purl.org/dc/elements/1.1/');
-        //$simpleXml->registerXPathNamespace('OAI-PMH', 'http://purl.org/dc/elements/1.1/');
-        return $simpleXml;
     }
 
     /**
@@ -74,9 +65,11 @@ class OaiParser
         return $sets;
     }
 
+    /**
+     * @return array
+     */
     public function parseRecordsList()
     {
-
 
         $list = [];
         $records = $this->simpleXMLObject->ListRecords->record;
@@ -89,7 +82,7 @@ class OaiParser
         }
 
         $recordsList = [
-            'list' => [],
+            'list' => $list,
             'infos' => $this->getResumptionToken()
         ];
         return $recordsList;
@@ -110,6 +103,11 @@ class OaiParser
         return $infos;
     }
 
+
+    /**
+     * @param SimpleXMLElement $record
+     * @return array
+     */
     private function getRecordFields(SimpleXMLElement $record)
     {
         $recordFields = [];
@@ -136,12 +134,12 @@ class OaiParser
 
         }
 
-
-        var_dump($recordFields);
-        die;
-
+        return $recordFields;
     }
 
+    /**
+     * @throws ParseException
+     */
     public function hasXmlErrorOccured()
     {
         if (count(\libxml_get_errors()) !== 0) {
