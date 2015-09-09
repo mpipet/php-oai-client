@@ -1,0 +1,20 @@
+{
+  "name": "mpipet/php-oai-client",
+  "description": "Oai client",
+  "keywords": ["oai","client", "php"],
+  "type": "library",
+  "license": "Apache 2",
+  "authors": [
+    {
+      "name": "Mathieu Pipet"
+    }
+  ],
+  "require": {
+    "php": ">=5.4"
+  },
+  "autoload": {
+    "psr-4": {
+      "Oai\\": "./"
+    }
+  }
+}
