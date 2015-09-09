@@ -1,7 +1,9 @@
 <?php
 
 namespace Oai;
-require_once('./Exceptions/ParseException.php');
+
+use Oai\Exceptions\ParseException;
+use SimpleXMLElement;
 
 class OaiParser
 {

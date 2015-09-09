@@ -1,7 +1,5 @@
 <?php
 namespace Oai;
-require_once('OaiClient.php');
-require_once('OaiParser.php');
 
 /**
  * Date: 09/09/15

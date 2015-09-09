@@ -2,7 +2,8 @@
 
 namespace Oai;
 
-require_once('./Exceptions/OaiException.php');
+use Oai\Exceptions\OaiException;
+
 class OaiClient
 {
 
