@@ -1,4 +1,6 @@
 <?php
+
+namespace Oai;
 require_once('./Exceptions/ParseException.php');
 
 class OaiParser

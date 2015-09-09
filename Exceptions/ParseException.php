@@ -1,4 +1,5 @@
 <?php
+namespace Oai\Exceptions;
 
 /**
  * Created by PhpStorm.
