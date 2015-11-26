@@ -34,7 +34,8 @@ class OaiClient
 
         if (curl_error($curl) || $xml === '') {
             throw new OaiException(
-                sprintf('Le service à l\'adresse: "%s" est injoignable.', $url)
+                OaiException::STORE_UNREACHABLE,
+                ['URL' => $url]
             );
         }
         curl_close($curl);
@@ -74,7 +75,7 @@ class OaiClient
      */
     public function listRecords($metadataPrefix, $setSpec = null, $token = null)
     {
-        if ($setSpec) {
+        if (!empty($setSpec)) {
             $params = 'ListRecords&metadataPrefix=' . $metadataPrefix . '&set=' . $setSpec;
         } else {
             $params = 'ListRecords&metadataPrefix=' . $metadataPrefix;

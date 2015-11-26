@@ -2,6 +2,7 @@
 
 namespace Oai;
 
+use Exception;
 use Oai\Exceptions\ParseException;
 use SimpleXMLElement;
 
@@ -9,6 +10,7 @@ class OaiParser
 {
 
     protected $simpleXMLObject = null;
+    protected $xml = null;
 
     /**
      * @param $xml
@@ -17,8 +19,15 @@ class OaiParser
     public function __construct($xml)
     {
         \libxml_use_internal_errors(true);
-        $this->simpleXMLObject = new SimpleXMLElement($xml);
+        libxml_clear_errors();
+        $this->xml = $xml;
+        try {
+            $this->simpleXMLObject = new SimpleXMLElement($xml);
+        } catch (Exception $e) {
+            throw new ParseException(ParseException::MALFORMED_XML, $this->xml);
+        }
         $this->hasXmlErrorOccured();
+        $this->hasOaiErrorOccured();
 
     }
 
@@ -31,6 +40,9 @@ class OaiParser
         $descriptions = $this->simpleXMLObject->xpath('//dc:description[@xml:lang="fre"]');
         if (!$descriptions) {
             $descriptions = $this->simpleXMLObject->xpath('//dc:description[@xml:lang="fr"]');
+        }
+        if (!$descriptions) {
+            $descriptions = [];
         }
         foreach ($descriptions as $desc) {
             $description .= (string)$desc . "\n";
@@ -71,12 +83,16 @@ class OaiParser
 
     /**
      * @return array
+     * @throws ParseException
      */
     public function parseRecordsList()
     {
 
         $list = [];
         $records = $this->simpleXMLObject->ListRecords->record;
+        if (empty($records)) {
+            throw new ParseException(ParseException::RECORD_LIST_EMPTY, $this->xml);
+        }
 
         foreach ($records as $record) {
 
@@ -111,6 +127,7 @@ class OaiParser
     /**
      * @param SimpleXMLElement $record
      * @return array
+     * @throws ParseException
      */
     private function getRecordFields(SimpleXMLElement $record)
     {
@@ -125,14 +142,18 @@ class OaiParser
                 $recordFields['setSpec'][] = (string)$set;
             }
         }
-
-        $prefixNode = $record->metadata->children('oai_dc', true);
-
+        $namespaces = $record->metadata->getNameSpaces(true);
+        $namespaces = array_diff($namespaces, ['http://www.openarchives.org/OAI/2.0/']);
+        $prefixes = array_keys($namespaces);
+        $prefixNode = $record->metadata->children($prefixes[0], true);
+        if (empty($prefixNode)) {
+            throw new ParseException(ParseException::EMPTY_XML_NODE, $this->xml);
+        }
 
         $fieldsNodes = $prefixNode->children('dc', true);
         foreach ($fieldsNodes as $fieldType => $field) {
             $attrs = $field->attributes('http://www.w3.org/XML/1998/namespace');
-            if(!isset($attrs['lang']) || $attrs['lang'] === 'fr' || $attrs['lang'] === 'fre'){
+            if (!isset($attrs['lang']) || $attrs['lang'] === 'fr' || $attrs['lang'] === 'fre') {
                 $recordFields[$fieldType][] = (string)$field;
             }
 
@@ -148,8 +169,19 @@ class OaiParser
     {
         if (count(\libxml_get_errors()) !== 0) {
             libxml_clear_errors();
-            throw new ParseException('Oai returned data could not be parsed.');
+            throw new ParseException(ParseException::MALFORMED_XML, $this->xml);
         }
 
+    }
+
+    /**
+     * @throws ParseException
+     */
+    private function hasOaiErrorOccured()
+    {
+        $errorNode = $this->simpleXMLObject->error;
+        if (!empty((string)$errorNode)) {
+            throw new ParseException(ParseException::OAI_ERROR, '', ['OAI_MESSAGE' => (string)$errorNode[0]]);
+        }
     }
 }
