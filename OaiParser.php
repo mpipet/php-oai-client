@@ -95,9 +95,9 @@ class OaiParser
         }
 
         foreach ($records as $record) {
-
             if ((string)$record->header['status'] !== 'deleted') {
-                $list[(string)$record->header->identifier] = $this->getRecordFields($record);
+                $list[(string)$record->header->identifier]['fields'] = $this->getRecordFields($record);
+                $list[(string)$record->header->identifier]['header'] = $this->getRecordHeader($record);
             }
         }
 
@@ -120,9 +120,34 @@ class OaiParser
             'total' => (string)$tokenTag['completeListSize'],
             'cursor' => (string)$tokenTag['cursor'],
         ];
+
         return $infos;
     }
 
+
+    /**
+     * @param $record
+     * @return array
+     */
+    private function getRecordHeader($record)
+    {
+        $header = [];
+        if (isset($record->header->datestamp)) {
+            $header['datestamp'] = (string)$record->header->datestamp;
+        }
+
+        if (isset($record->header->identifier)) {
+            $header['identifier'] = (string)$record->header->identifier;
+        }
+
+        if (isset($record->header->setSpec)) {
+            $header['setSpec'] = [];
+            foreach ($record->header->setSpec as $set) {
+                $header['setSpec'][] = (string)$set;
+            }
+        }
+        return $header;
+    }
 
     /**
      * @param SimpleXMLElement $record
@@ -132,16 +157,7 @@ class OaiParser
     private function getRecordFields(SimpleXMLElement $record)
     {
         $recordFields = [];
-        if (isset($record->header->datestamp)) {
-            $recordFields['datestamp'] = (string)$record->header->datestamp;
-        }
 
-        if (isset($record->header->setSpec)) {
-            $recordFields['setSpec'] = [];
-            foreach ($record->header->setSpec as $set) {
-                $recordFields['setSpec'][] = (string)$set;
-            }
-        }
         $namespaces = $record->metadata->getNameSpaces(true);
         $namespaces = array_diff($namespaces, ['http://www.openarchives.org/OAI/2.0/']);
         $prefixes = array_keys($namespaces);
