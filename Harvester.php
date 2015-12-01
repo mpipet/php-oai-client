@@ -34,9 +34,7 @@ class Harvester
 
     public function harvestSegment(callable $callback, $token = null)
     {
-        $listRecord = $this->oaiClient->listRecords($this->metadataFormat, $this->set, $token);
-        $parser = new OaiParser($listRecord);
-        $records = $parser->parseRecordsList();
+        $records =$this->oaiClient->listRecords($this->metadataFormat, $this->set, $token);
         $callback($records);
         return $records['infos']['token'];
     }

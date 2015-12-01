@@ -1,89 +1,61 @@
 <?php
 
 namespace Oai;
-
-use Oai\Exceptions\OaiException;
+use OaiBundle\Exception\ParseException;
 
 class OaiClient
 {
-
-    protected $url = '';
-
     /**
      * @param string $url
      */
     public function __construct($url)
     {
-        $this->url = $url;
-
+        $this->verbClient = new VerbClient($url);
     }
 
-
-    /**
-     * @param $params
-     * @return mixed
-     * @throws OaiException
-     */
-    protected function fetchService($params)
-    {
-        $url = $this->url . '?verb=' . $params;
-        $curl = curl_init();
-        curl_setopt($curl, CURLOPT_URL, $url);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-        $xml = curl_exec($curl);
-
-        if (curl_error($curl) || $xml === '') {
-            throw new OaiException(
-                OaiException::STORE_UNREACHABLE,
-                ['URL' => $url]
-            );
-        }
-        curl_close($curl);
-
-        return $xml;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function listSets()
-    {
-        return $this->fetchService('ListSets');
-    }
-
-    /**
-     * @return mixed
-     */
-    public function identify()
-    {
-        return $this->fetchService('Identify');
-    }
-
-    /**
-     * @return mixed
-     */
-    public function listMetadataFormats()
-    {
-        return $this->fetchService('ListMetadataFormats');
-    }
 
     /**
      * @param $metadataPrefix
-     * @param $setSpec
+     * @param null $setSpec
      * @param null $token
-     * @return mixed
+     * @return array
+     * @throws ParseException
      */
-    public function listRecords($metadataPrefix, $setSpec = null, $token = null)
-    {
-        if (!empty($setSpec)) {
-            $params = 'ListRecords&metadataPrefix=' . $metadataPrefix . '&set=' . $setSpec;
-        } else {
-            $params = 'ListRecords&metadataPrefix=' . $metadataPrefix;
-        }
-        if ($token) {
-            $params = 'ListRecords&resumptionToken=' . $token;
-        }
-        return $this->fetchService($params);
+    public function listRecords($metadataPrefix, $setSpec = null, $token = null){
+        $xml = $this->verbClient->listRecords($metadataPrefix, $setSpec, $token);
+        $parser = new OaiParser($xml);
+        return $parser->parseRecordsList();
     }
+
+    /**
+     * @return array
+     */
+    public function listSets()
+    {
+        $xml = $this->verbClient->listSets();
+        $parser = new OaiParser($xml);
+        return $parser->parseSetList();
+    }
+
+    /**
+     * @return array
+     */
+    public function listMetadataFormats()
+    {
+        $xml = $this->verbClient->listMetadataFormats();
+        $parser = new OaiParser($xml);
+        return $parser->parseMetadataFormats();
+    }
+
+    /**
+     * @return array
+     */
+    public function identify()
+    {
+        $xml = $this->verbClient->identify();
+        $parser = new OaiParser($xml);
+        return $parser->parseIdentify();
+    }
+
 
 }
