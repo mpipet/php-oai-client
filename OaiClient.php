@@ -13,7 +13,6 @@ class OaiClient
         $this->verbClient = new VerbClient($url);
     }
 
-
     /**
      * @param $metadataPrefix
      * @param null $setSpec
@@ -56,6 +55,5 @@ class OaiClient
         $parser = new OaiParser($xml);
         return $parser->parseIdentify();
     }
-
 
 }

@@ -1,26 +1,27 @@
 <?php
 namespace Oai;
 
-use Oai\Exceptions\OaiException;
+use Oai\Exceptions\VerbException;
 
 class VerbClient
 {
     protected $url = '';
+    protected $timeout;
 
     /**
      * @param string $url
      */
-    public function __construct($url)
+    public function __construct($url, $timeout = 5)
     {
         $this->url = $url;
+        $this->timeout = $timeout;
 
     }
-
 
     /**
      * @param $params
      * @return mixed
-     * @throws OaiException
+     * @throws VerbException
      */
     protected function fetchService($params)
     {
@@ -28,11 +29,12 @@ class VerbClient
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, $this->timeout);
         $xml = curl_exec($curl);
 
         if (curl_error($curl) || $xml === '') {
-            throw new OaiException(
-                OaiException::STORE_UNREACHABLE,
+            throw new VerbException(
+                VerbException::STORE_UNREACHABLE,
                 ['URL' => $url]
             );
         }

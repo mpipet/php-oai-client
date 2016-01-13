@@ -4,19 +4,13 @@ namespace Oai\Exceptions;
 use Exception;
 
 /**
- * Created by PhpStorm.
- * User: bedervet
+ * User: mpipet
  * Date: 09/09/15
  * Time: 00:07
  */
 class OaiException extends \Exception
 {
-    const STORE_UNREACHABLE = 'STORE_UNREACHABLE';
-
-
-    protected $xml = '';
     protected $datas = [];
-
 
     /**
      * @param string $message
@@ -25,11 +19,9 @@ class OaiException extends \Exception
      */
     public function __construct($message = "", $datas = [], Exception $previous = null)
     {
-
         $this->datas = $datas;
         parent::__construct($message, 0, $previous);
     }
-
 
     /**
      * @return array|\Exception
@@ -38,4 +30,5 @@ class OaiException extends \Exception
     {
         return $this->datas;
     }
+
 }

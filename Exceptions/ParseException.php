@@ -4,12 +4,11 @@ namespace Oai\Exceptions;
 use Exception;
 
 /**
- * Created by PhpStorm.
- * User: bedervet
+ * User: mpipet
  * Date: 09/09/15
  * Time: 00:07
  */
-class ParseException extends Exception
+class ParseException extends OaiException
 {
 
     const RECORD_LIST_EMPTY = 'RECORD_LIST_EMPTY';
@@ -17,9 +16,7 @@ class ParseException extends Exception
     const OAI_ERROR = 'OAI_ERROR';
     const MALFORMED_XML = 'MALFORMED_XML';
 
-
     protected $xml = '';
-    protected $datas = [];
 
     /**
      * @param string $message
@@ -29,12 +26,10 @@ class ParseException extends Exception
      */
     public function __construct($message = "", $xml = '', $datas = [], Exception $previous = null)
     {
-
         $this->xml = $xml;
         $this->datas = $datas;
-        parent::__construct($message, 0, $previous);
+        parent::__construct($message, $datas, $previous);
     }
-
 
     /**
      * @return string
@@ -42,15 +37,6 @@ class ParseException extends Exception
     public function getXml()
     {
         return $this->xml;
-    }
-
-
-    /**
-     * @return array|\Exception
-     */
-    public function getDatas()
-    {
-        return $this->datas;
     }
 
 }

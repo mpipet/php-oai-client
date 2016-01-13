@@ -187,7 +187,6 @@ class OaiParser
             libxml_clear_errors();
             throw new ParseException(ParseException::MALFORMED_XML, $this->xml);
         }
-
     }
 
     /**

@@ -17,13 +17,21 @@ class Harvester
 
     protected $currentRetry = 0;
 
-    public function __construct($url, $metadataFormat, $set = '')
+    /**
+     * @param $url
+     * @param $metadataFormat
+     * @param string $set
+     */
+    public function __construct($url, $metadataFormat, $set = '', $timeout = 5)
     {
-        $this->oaiClient = new OaiClient($url);
+        $this->oaiClient = new OaiClient($url, $timeout);
         $this->metadataFormat = $metadataFormat;
         $this->set = $set;
     }
 
+    /**
+     * @param callable $callback
+     */
     public function launch(callable $callback)
     {
         $token = null;
@@ -32,6 +40,11 @@ class Harvester
         } while ($token != null);
     }
 
+    /**
+     * @param callable $callback
+     * @param null $token
+     * @return mixed
+     */
     public function harvestSegment(callable $callback, $token = null)
     {
         $records =$this->oaiClient->listRecords($this->metadataFormat, $this->set, $token);
