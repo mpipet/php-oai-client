@@ -16,10 +16,22 @@ class OaiParser
      * @param $xml
      * @throws ParseException
      */
-    public function __construct($xml)
+    public function __construct($xml = '')
     {
+        if(!empty($xml)){
+            $this->loadXml($xml);
+        }
+    }
+
+    /**
+     * @param $xml
+     * @throws ParseException
+     */
+    public function loadXml($xml){
         \libxml_use_internal_errors(true);
         libxml_clear_errors();
+        unset($this->xml);
+        unset($this->simpleXMLObject);
         $this->xml = $xml;
         try {
             $this->simpleXMLObject = new SimpleXMLElement($xml);
@@ -28,7 +40,6 @@ class OaiParser
         }
         $this->hasXmlErrorOccured();
         $this->hasOaiErrorOccured();
-
     }
 
     /**

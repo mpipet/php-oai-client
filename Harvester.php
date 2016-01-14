@@ -1,33 +1,18 @@
 <?php
 namespace Oai;
+use Exception;
 
 /**
  * Date: 09/09/15
  * Time: 00:28
  */
-class Harvester
+class Harvester extends OaiClient
 {
-    protected $metadataFormat;
+    protected $metadataFormat = 'oai_dc';
 
     protected $set;
 
-    protected $oaiClient;
-
     protected $maxRetry = 3;
-
-    protected $currentRetry = 0;
-
-    /**
-     * @param $url
-     * @param $metadataFormat
-     * @param string $set
-     */
-    public function __construct($url, $metadataFormat, $set = '', $timeout = 5)
-    {
-        $this->oaiClient = new OaiClient($url, $timeout);
-        $this->metadataFormat = $metadataFormat;
-        $this->set = $set;
-    }
 
     /**
      * @param callable $callback
@@ -47,9 +32,35 @@ class Harvester
      */
     public function harvestSegment(callable $callback, $token = null)
     {
-        $records =$this->oaiClient->listRecords($this->metadataFormat, $this->set, $token);
-        $callback($records);
+        $retry = 0;
+        while (empty($records) && $retry <= $this->maxRetry) {
+            $records = [];
+            try {
+                $records = $this->listRecords($this->metadataFormat, $this->set, $token);
+                $callback($records);
+            } catch (Exception $e) {
+                var_dump('retry');
+                $retry += 1;
+            }
+        }
+
         return $records['infos']['token'];
+    }
+
+    /**
+     * @param mixed $set
+     */
+    public function setSet($set)
+    {
+        $this->set = $set;
+    }
+
+    /**
+     * @param mixed $metadataFormat
+     */
+    public function setMetadataFormat($metadataFormat)
+    {
+        $this->metadataFormat = $metadataFormat;
     }
 
 }

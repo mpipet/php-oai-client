@@ -1,16 +1,16 @@
 <?php
 
 namespace Oai;
-use OaiBundle\Exception\ParseException;
 
-class OaiClient
+use Oai\Exceptions\ParseException;
+
+class OaiClient extends VerbClient
 {
-    /**
-     * @param string $url
-     */
-    public function __construct($url)
-    {
-        $this->verbClient = new VerbClient($url);
+    protected $parser;
+
+    public function __construct($url = ''){
+        parent::__construct($url);
+        $this->parser = new OaiParser();
     }
 
     /**
@@ -21,9 +21,9 @@ class OaiClient
      * @throws ParseException
      */
     public function listRecords($metadataPrefix, $setSpec = null, $token = null){
-        $xml = $this->verbClient->listRecords($metadataPrefix, $setSpec, $token);
-        $parser = new OaiParser($xml);
-        return $parser->parseRecordsList();
+        $xml = parent::listRecords($metadataPrefix, $setSpec, $token);
+        $this->parser->loadXml($xml);
+        return $this->parser->parseRecordsList();
     }
 
     /**
@@ -31,9 +31,9 @@ class OaiClient
      */
     public function listSets()
     {
-        $xml = $this->verbClient->listSets();
-        $parser = new OaiParser($xml);
-        return $parser->parseSetList();
+        $xml = parent::listSets();
+        $this->parser->loadXml($xml);
+        return $this->parser->parseSetList();
     }
 
     /**
@@ -41,9 +41,9 @@ class OaiClient
      */
     public function listMetadataFormats()
     {
-        $xml = $this->verbClient->listMetadataFormats();
-        $parser = new OaiParser($xml);
-        return $parser->parseMetadataFormats();
+        $xml = parent::listMetadataFormats();
+        $this->parser->loadXml($xml);
+        return $this->parser->parseMetadataFormats();
     }
 
     /**
@@ -51,9 +51,9 @@ class OaiClient
      */
     public function identify()
     {
-        $xml = $this->verbClient->identify();
-        $parser = new OaiParser($xml);
-        return $parser->parseIdentify();
+        $xml = parent::identify();
+        $this->parser->loadXml($xml);
+        return $this->parser->parseIdentify();
     }
 
 }

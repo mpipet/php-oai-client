@@ -5,17 +5,15 @@ use Oai\Exceptions\VerbException;
 
 class VerbClient
 {
-    protected $url = '';
-    protected $timeout;
+    protected $url;
+    protected $timeout = 5;
 
     /**
      * @param string $url
      */
-    public function __construct($url, $timeout = 5)
+    public function __construct($url = '')
     {
         $this->url = $url;
-        $this->timeout = $timeout;
-
     }
 
     /**
@@ -85,4 +83,21 @@ class VerbClient
         }
         return $this->fetchService($params);
     }
+
+    /**
+     * @param int $timeout
+     */
+    public function setTimeout($timeout)
+    {
+        $this->timeout = $timeout;
+    }
+
+    /**
+     * @param string $url
+     */
+    public function setUrl($url)
+    {
+        $this->url = $url;
+    }
+
 }
